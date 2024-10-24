@@ -28,7 +28,7 @@ public class EventPanelModule : InteractionModuleBase<SocketInteractionContext>
                             " ※ 2回行う毎に**3分の**クールダウンが入ります。¥n" +
                             "3. お菓子を奪うのに失敗したら、ニックネームが変更されます。(ランダムです。名前は戻せます。)¥n" +
                             "4. 持ち点が0になってもゲームオーバーにはなりません。ご安心ください。¥n¥n" +
-                            "### 結果発表等について" +
+                            "### 結果発表等について¥n" +
                             "11/1の夜に行いたいと思います。 景品等は後日お知らせします。");
         
         var componentBuilder = new ComponentBuilder()
