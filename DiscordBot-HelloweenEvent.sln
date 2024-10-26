@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.11.35219.272
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiscordBot-Template", "DiscordBot-Template\DiscordBot-Template.csproj", "{1352CAEA-29E0-4E42-BBD6-027AC4475E2C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiscordBot-HelloweenEvent", "DiscordBot-HelloweenEvent\DiscordBot-HelloweenEvent.csproj", "{1352CAEA-29E0-4E42-BBD6-027AC4475E2C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
