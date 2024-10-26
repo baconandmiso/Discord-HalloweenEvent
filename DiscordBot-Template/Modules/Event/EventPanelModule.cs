@@ -1,6 +1,3 @@
-using System.ComponentModel;
-using System.Net.Sockets;
-
 namespace DiscordBot_Template.Modules;
 
 [DefaultMemberPermissions(GuildPermission.Administrator)]
@@ -30,7 +27,7 @@ public class EventPanelModule : InteractionModuleBase<SocketInteractionContext>
                             "4. 持ち点が0になってもゲームオーバーにはなりません。ご安心ください。¥n¥n" +
                             "### 結果発表等について¥n" +
                             "11/1の夜に行いたいと思います。 景品等は後日お知らせします。");
-        
+
         var componentBuilder = new ComponentBuilder()
             .WithButton("お菓子を受け取る", "take_candy", ButtonStyle.Primary)
             .WithButton("お菓子を奪う", "steal_candy", ButtonStyle.Secondary);

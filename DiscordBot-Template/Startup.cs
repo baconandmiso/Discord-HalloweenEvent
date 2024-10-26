@@ -32,7 +32,8 @@ builder.Services.AddSingleton(new DiscordSocketClient(
         AlwaysDownloadUsers = false,
         LogGatewayIntentWarnings = false,
         LogLevel = LogSeverity.Info
-    }));
+    }
+));
 
 builder.Services.AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>(), new InteractionServiceConfig()
 {
