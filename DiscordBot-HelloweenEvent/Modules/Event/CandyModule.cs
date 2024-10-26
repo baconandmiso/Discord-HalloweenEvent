@@ -4,6 +4,8 @@ public class CandyModule : InteractionModuleBase<SocketInteractionContext>
 {
     private readonly ILogger<CandyModule> _logger;
 
+    private readonly Random Random;
+
     private static Dictionary<ulong, Point> _point = new Dictionary<ulong, Point>();
 
     /// <summary>
@@ -32,7 +34,7 @@ public class CandyModule : InteractionModuleBase<SocketInteractionContext>
     /// <returns></returns>
     private async Task FailedSteal(int points)
     {
-        var myPoint = new Point(Context.User.Id, _point.GetValueOrDefault(Context.User.Id)!.Score - 4);
+        var myPoint = new Point(Context.User.Id, _point.GetValueOrDefault(Context.User.Id)!.Score - points);
         _point[Context.User.Id] = myPoint;
 
         Console.WriteLine($"{Context.User.Id}のスコア: {_point[Context.User.Id].Score}");
@@ -40,14 +42,17 @@ public class CandyModule : InteractionModuleBase<SocketInteractionContext>
         await FollowupAsync($"お菓子を奪うのに失敗しました。\n**罰ゲーム**\n{points}減点します。", ephemeral: true);
     }
 
+    /// <summary>
+    ///     抽選
+    /// </summary>
     private bool IsChance(double probability)
     {
-        var random = new Random();
-        return random.NextDouble() < probability;
+        return Random.NextDouble() < probability;
     }
 
     public CandyModule(ILogger<CandyModule> logger)
     {
+        Random = new Random();
         _logger = logger;
     }
 
@@ -79,11 +84,8 @@ public class CandyModule : InteractionModuleBase<SocketInteractionContext>
     {
         var message = (IComponentInteraction)Context.Interaction;
 
-        var random = new Random();
-        var number = random.Next(0, _point.Count - 1);
-        var targets = _point.Keys.Where(x => x != Context.User.Id).ToArray();
-
         await message.Message.ModifyAsync(x => x.Components = EventPanel.ComponentBuilder.Build());
+        await DeferAsync();
 
         if (!_point.ContainsKey(Context.User.Id))
         {
@@ -91,10 +93,11 @@ public class CandyModule : InteractionModuleBase<SocketInteractionContext>
             return;
         }
 
+        var number = Random.Next(0, _point.Count - 1);
+        var targets = _point.Keys.Where(x => x != Context.User.Id).ToArray();
+
         if (!_point.TryGetValue(targets[number], out var point))
             return;
-
-        await DeferAsync();
 
         switch (candy)
         {
