@@ -4,7 +4,7 @@ public class CandyModule : InteractionModuleBase<SocketInteractionContext>
 {
     private readonly ILogger<CandyModule> _logger;
 
-    private readonly Random Random;
+    private readonly Random _random;
 
     private static Dictionary<ulong, Point> _point = new Dictionary<ulong, Point>();
 
@@ -47,12 +47,12 @@ public class CandyModule : InteractionModuleBase<SocketInteractionContext>
     /// </summary>
     private bool IsChance(double probability)
     {
-        return Random.NextDouble() < probability;
+        return _random.NextDouble() < probability;
     }
 
     public CandyModule(ILogger<CandyModule> logger)
     {
-        Random = new Random();
+        _random = new Random();
         _logger = logger;
     }
 
@@ -93,7 +93,7 @@ public class CandyModule : InteractionModuleBase<SocketInteractionContext>
             return;
         }
 
-        var number = Random.Next(0, _point.Count - 1);
+        var number = _random.Next(0, _point.Count - 1);
         var targets = _point.Keys.Where(x => x != Context.User.Id).ToArray();
 
         if (!_point.TryGetValue(targets[number], out var point))
