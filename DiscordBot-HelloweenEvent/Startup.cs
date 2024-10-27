@@ -10,7 +10,9 @@ using DiscordBot_Template.Services;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Modules.Event;
 using MySql.Data.MySqlClient;
+using Quartz;
 using Serilog;
 
 var builder = new HostApplicationBuilder(args);
@@ -21,6 +23,8 @@ var loggerConfig = new LoggerConfiguration()
     .WriteTo.Console()
     .WriteTo.File($"./logs.d/log-{DateTime.Now:yy.MM.dd_HH.mm}.log")
     .CreateLogger();
+
+Quartz.Logging.LogProvider.IsDisabled = true;
 
 builder.Logging.ClearProviders();
 builder.Logging.AddSerilog(loggerConfig, dispose: true);
@@ -54,6 +58,21 @@ builder.Services.AddSingleton(provider =>
     return new MySqlConnectionStringBuilder(connectionString);
 });
 
+builder.Services.AddQuartz(provider =>
+{
+    var jobKey = new JobKey("RankingUpdateJob");
+
+    provider.AddJob<RankingUpdateJob>(jobKey, j => j.WithIdentity(jobKey));
+    provider.AddTrigger(trigger =>
+    {
+        trigger.ForJob(jobKey);
+        trigger.WithIdentity("RankingUpdateTrigger");
+        trigger.WithCronSchedule("0 0/10 * * * ?");
+    });
+});
+
+builder.Services.AddQuartzHostedService(quartz => quartz.WaitForJobsToComplete = true);
+builder.Services.AddSingleton<RankingUpdateJob>();
 builder.Services.AddSingleton<DiscordBotDBContext>();
 builder.Services.AddSingleton<InteractionHandler>();
 builder.Services.AddSingleton<IThrottleService, ThrottleService>();
