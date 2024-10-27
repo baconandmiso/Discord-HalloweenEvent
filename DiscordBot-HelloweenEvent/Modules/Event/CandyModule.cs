@@ -1,4 +1,5 @@
-﻿using DiscordBot_HelloweenEvent.Database;
+﻿using Common.Throttle;
+using DiscordBot_HelloweenEvent.Database;
 using DiscordBot_HelloweenEvent.Database.Models;
 
 namespace Modules.Event;
@@ -116,6 +117,7 @@ public class CandyModule : InteractionModuleBase<SocketInteractionContext>
     /// <summary>
     ///     相手からお菓子を奪う
     /// </summary>
+    [ThrottleCommand(ThrottleBy.User, 2, 180)]
     [ComponentInteraction("steal_candy")]
     public async Task StealCandy(string candy)
     {
@@ -137,6 +139,17 @@ public class CandyModule : InteractionModuleBase<SocketInteractionContext>
             await FollowupAsync("自分以外にお菓子を持っているプレイヤーがいません。", ephemeral: true);
             return;
         }
+
+        var myPoints = _dbContext.EventPoints.First(x => x.UserId == Context.User.Id);
+        if (!myPoints.IsListedRanking)
+            myPoints.StealCount++;
+
+        if (myPoints.StealCount == 5)
+        {
+            myPoints.IsListedRanking = true;
+        }
+
+        _dbContext.SaveChanges();
 
         var targetId = targets.ToArray()[number].UserId;
 
