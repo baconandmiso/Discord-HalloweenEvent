@@ -12,4 +12,10 @@ public class EventPoint
 
     [Column("score")]
     public int Score { get; set; }
+
+    [Column("steal_count")]
+    public int StealCount { get; set; }
+
+    [Column("is_listed_ranking")]
+    public bool IsListedRanking { get; set; }
 }
