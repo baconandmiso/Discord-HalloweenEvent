@@ -1,4 +1,7 @@
-﻿namespace Modules.Event;
+﻿using DiscordBot_HelloweenEvent.Database;
+using DiscordBot_HelloweenEvent.Database.Models;
+
+namespace Modules.Event;
 
 public class CandyModule : InteractionModuleBase<SocketInteractionContext>
 {
@@ -6,7 +9,7 @@ public class CandyModule : InteractionModuleBase<SocketInteractionContext>
 
     private readonly Random _random;
 
-    private static Dictionary<ulong, Point> _point = new Dictionary<ulong, Point>();
+    private readonly DiscordBotDBContext _dbContext;
 
     /// <summary>
     ///     お菓子を奪うのに成功したときの処理
@@ -15,14 +18,35 @@ public class CandyModule : InteractionModuleBase<SocketInteractionContext>
     /// <param name="targetId">奪われる人</param>
     private async Task SuccesfulSteal(int points, ulong targetId)
     {
-        var myPoint = new Point(Context.User.Id, _point.GetValueOrDefault(Context.User.Id)!.Score + points);
-        var opponentPoint = new Point(targetId, _point[targetId].Score - points);
+        var myPoints = _dbContext.EventPoints.FirstOrDefault(x => x.UserId == Context.User.Id);
+        var opponentPoints = _dbContext.EventPoints.FirstOrDefault(x => x.UserId == targetId);
+        if (myPoints == null || opponentPoints == null)
+        {
+            await FollowupAsync("お菓子を持っているプレイヤーがいません。", ephemeral: true);
+            return;
+        }
 
-        _point[Context.User.Id] = myPoint;
-        _point[targetId] = opponentPoint;
+        var myPoint = new Point(Context.User.Id, myPoints.Score); // 自分
+        var opponentPoint = new Point(targetId, opponentPoints.Score); // 相手
 
-        Console.WriteLine($"{Context.User.Id}のスコア: {_point[Context.User.Id].Score}");
-        Console.WriteLine($"{targetId}のスコア: {_point[targetId].Score}");
+        var addPoint = new Point(Context.User.Id, points); // 増やす点数
+        var subPoint = new Point(targetId, points); // 減らす点数
+
+        var subedOpponentPoint = opponentPoint.Sub(subPoint);
+        if (subedOpponentPoint.Score < 0) // 再抽選(MAX=3)
+        {
+            return;
+        }
+
+        var addedMyPoint = myPoint.Add(addPoint);
+
+        myPoints.Score = addedMyPoint.Score;
+        opponentPoints.Score = subedOpponentPoint.Score;
+
+        await _dbContext.SaveChangesAsync();
+
+        Console.WriteLine($"{Context.User.Id}のスコア: {myPoints.Score}");
+        Console.WriteLine($"{targetId}のスコア: {opponentPoints.Score}");
 
         await FollowupAsync($"お菓子を奪いました。\n**おめでとう！**{points}pt獲得しました。", ephemeral: true);
     }
@@ -34,12 +58,23 @@ public class CandyModule : InteractionModuleBase<SocketInteractionContext>
     /// <returns></returns>
     private async Task FailedSteal(int points)
     {
-        var myPoint = new Point(Context.User.Id, _point.GetValueOrDefault(Context.User.Id)!.Score - points);
-        _point[Context.User.Id] = myPoint;
+        var myPoints = _dbContext.EventPoints.FirstOrDefault(x => x.UserId == Context.User.Id);
+        if (myPoints == null)
+        {
+            await FollowupAsync("お菓子を持っているプレイヤーがいません。", ephemeral: true);
+            return;
+        }
 
-        Console.WriteLine($"{Context.User.Id}のスコア: {_point[Context.User.Id].Score}");
+        var myPoint = new Point(Context.User.Id, myPoints.Score);
+        var subPoint = new Point(Context.User.Id, points);
+        var subedMyPoint = myPoint.Sub(subPoint);
 
-        await FollowupAsync($"お菓子を奪うのに失敗しました。\n**罰ゲーム**\n{points}減点します。", ephemeral: true);
+        myPoints.Score = subedMyPoint.Score;
+        await _dbContext.SaveChangesAsync();
+
+        Console.WriteLine($"{Context.User.Id}のスコア: {myPoints.Score}");
+
+        await FollowupAsync($"お菓子を奪うのに失敗しました。\n**罰ゲーム**\n{points}pt減点します。", ephemeral: true);
     }
 
     /// <summary>
@@ -50,10 +85,11 @@ public class CandyModule : InteractionModuleBase<SocketInteractionContext>
         return _random.NextDouble() < probability;
     }
 
-    public CandyModule(ILogger<CandyModule> logger)
+    public CandyModule(ILogger<CandyModule> logger, DiscordBotDBContext dbContext)
     {
         _random = new Random();
         _logger = logger;
+        _dbContext = dbContext;
     }
 
     /// <summary>
@@ -64,14 +100,15 @@ public class CandyModule : InteractionModuleBase<SocketInteractionContext>
     {
         await DeferAsync();
 
-        if (_point.ContainsKey(Context.User.Id))
+        if (_dbContext.EventPoints.FirstOrDefault(x => x.UserId == Context.User.Id) != null)
         {
-            await FollowupAsync("お菓子はすでに受け取っています。", ephemeral: true);
+            await FollowupAsync("お菓子をすでに受け取っています。", ephemeral: true);
             return;
         }
 
         var point = new Point(Context.User.Id, 50);
-        _point.Add(Context.User.Id, point);
+        _dbContext.EventPoints.Add(new EventPoint { UserId = point.UserId, Score = point.Score });
+        await _dbContext.SaveChangesAsync();
 
         await FollowupAsync("お菓子を受け取りました。", ephemeral: true);
     }
@@ -82,29 +119,33 @@ public class CandyModule : InteractionModuleBase<SocketInteractionContext>
     [ComponentInteraction("steal_candy")]
     public async Task StealCandy(string candy)
     {
-        var message = (IComponentInteraction)Context.Interaction;
-
-        await message.Message.ModifyAsync(x => x.Components = EventPanel.ComponentBuilder.Build());
         await DeferAsync();
 
-        if (!_point.ContainsKey(Context.User.Id))
+        var message = (IComponentInteraction)Context.Interaction;
+        await message.Message.ModifyAsync(x => x.Components = EventPanel.ComponentBuilder.Build());
+
+        if (_dbContext.EventPoints.FirstOrDefault(x => x.UserId == Context.User.Id) == null)
         {
-            await RespondAsync("お菓子を持っていません。", ephemeral: true);
+            await FollowupAsync("お菓子を持っていません。", ephemeral: true);
             return;
         }
 
-        var number = _random.Next(0, _point.Count - 1);
-        var targets = _point.Keys.Where(x => x != Context.User.Id).ToArray();
-
-        if (!_point.TryGetValue(targets[number], out var point))
+        var targets = _dbContext.EventPoints.Where(x => x.UserId != Context.User.Id && x.Score > 4);
+        var number = _random.Next(0, targets.Count());
+        if (!targets.Any())
+        {
+            await FollowupAsync("自分以外にお菓子を持っているプレイヤーがいません。", ephemeral: true);
             return;
+        }
+
+        var targetId = targets.ToArray()[number].UserId;
 
         switch (candy)
         {
             case "very_high_candy":
                 if (IsChance(0.3))
                 {
-                    await SuccesfulSteal(4, targets[number]);
+                    await SuccesfulSteal(4, targetId);
                 }
                 else
                 {
@@ -114,7 +155,7 @@ public class CandyModule : InteractionModuleBase<SocketInteractionContext>
             case "high_candy":
                 if (IsChance(0.4))
                 {
-                    await SuccesfulSteal(3, targets[number]);
+                    await SuccesfulSteal(3, targetId);
                 }
                 else
                 {
@@ -124,7 +165,7 @@ public class CandyModule : InteractionModuleBase<SocketInteractionContext>
             case "normal_candy":
                 if (IsChance(0.6))
                 {
-                    await SuccesfulSteal(2, targets[number]);
+                    await SuccesfulSteal(2, targetId);
                 }
                 else
                 {
@@ -134,7 +175,7 @@ public class CandyModule : InteractionModuleBase<SocketInteractionContext>
             case "low_candy":
                 if (IsChance(0.8))
                 {
-                    await SuccesfulSteal(1, targets[number]);
+                    await SuccesfulSteal(1, targetId);
                 }
                 else
                 {
