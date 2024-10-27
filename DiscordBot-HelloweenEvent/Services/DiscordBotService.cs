@@ -2,13 +2,13 @@
 
 namespace DiscordBot_Template.Services;
 
-public class DiscordBotService(DiscordSocketClient client, InteractionService interactions, IConfiguration config, ILogger<DiscordBotService> logger, 
+public class DiscordBotService(DiscordSocketClient client, InteractionService interactions, IConfiguration config, ILogger<DiscordBotService> logger,
     InteractionHandler interactionHandler) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
         client.Ready += OnReady;
-        
+
         client.Log += Log;
         interactions.Log += Log;
 

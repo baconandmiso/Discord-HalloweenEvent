@@ -55,7 +55,6 @@ public class ThrottleCommandAttribute : PreconditionAttribute
             return PreconditionResult.FromSuccess();
 
         var reset = throttleService.GetThrottleReset(ThrottleBy, Limit, IntervalSeconds, context.User, context.Guild, command);
-        await context.Interaction.RespondAsync($"クールダウン中です。 **{reset.TotalSeconds:F0}秒後**に実行してください。", ephemeral: true);
-        return PreconditionResult.FromError("Throttle exceeded");
+        return PreconditionResult.FromError($"クールダウン中です。 **{reset.TotalSeconds:F0}秒後**に実行してください。");
     }
 }

@@ -7,7 +7,7 @@ public class InteractionHandler(DiscordSocketClient client, InteractionService i
     public async Task InitializeAsync()
     {
         await interactions.AddModulesAsync(Assembly.GetEntryAssembly(), services);
-    
+
         client.InteractionCreated += OnInteractionCreated;
         interactions.InteractionExecuted += OnInteractionExecuted;
     }
@@ -62,11 +62,11 @@ public class InteractionHandler(DiscordSocketClient client, InteractionService i
 
         if (!interaction.HasResponded)
         {
-            await interaction.RespondAsync($"失敗: エラーが発生しました。\n```\n{result.Error}\n```", ephemeral: true);
+            await interaction.RespondAsync($"失敗: エラーが発生しました。\n{result.ErrorReason}", ephemeral: true);
         }
         else
         {
-            await interaction.FollowupAsync($"失敗: エラーが発生しました。\n```\n{result.Error}\n```", ephemeral: true);
+            await interaction.FollowupAsync($"失敗: エラーが発生しました。\n{result.ErrorReason}", ephemeral: true);
         }
     }
 }
