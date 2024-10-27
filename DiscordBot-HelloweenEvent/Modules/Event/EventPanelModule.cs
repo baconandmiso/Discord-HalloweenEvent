@@ -11,6 +11,7 @@ public class EventPanelModule : InteractionModuleBase<SocketInteractionContext>
         _logger = logger;
     }
 
+    [RequireOwner]
     [SlashCommand("create", "イベントパネルを作成します。")]
     public async Task Create()
     {
