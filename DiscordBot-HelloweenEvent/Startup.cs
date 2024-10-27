@@ -30,6 +30,7 @@ builder.Services.AddSingleton(new DiscordSocketClient(
     {
         GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.GuildMembers | GatewayIntents.GuildPresences | GatewayIntents.MessageContent,
         FormatUsersInBidirectionalUnicode = false,
+        UseInteractionSnowflakeDate = false,
         AlwaysDownloadUsers = false,
         LogGatewayIntentWarnings = false,
         LogLevel = LogSeverity.Info
@@ -55,7 +56,7 @@ builder.Services.AddSingleton(provider =>
 
 builder.Services.AddSingleton<DiscordBotDBContext>();
 builder.Services.AddSingleton<InteractionHandler>();
-builder.Services.AddScoped<IThrottleService, ThrottleService>();
+builder.Services.AddSingleton<IThrottleService, ThrottleService>();
 
 builder.Services.AddHostedService<DiscordBotService>();
 
