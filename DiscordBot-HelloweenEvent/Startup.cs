@@ -4,6 +4,7 @@ global using Discord.WebSocket;
 
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.Logging;
+using Common.Throttle;
 using DiscordBot_HelloweenEvent.Database;
 using DiscordBot_Template.Services;
 
@@ -54,6 +55,7 @@ builder.Services.AddSingleton(provider =>
 
 builder.Services.AddSingleton<DiscordBotDBContext>();
 builder.Services.AddSingleton<InteractionHandler>();
+builder.Services.AddScoped<IThrottleService, ThrottleService>();
 
 builder.Services.AddHostedService<DiscordBotService>();
 
