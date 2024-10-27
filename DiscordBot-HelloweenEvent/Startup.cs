@@ -4,12 +4,12 @@ global using Discord.WebSocket;
 
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.Logging;
-
+using DiscordBot_HelloweenEvent.Database;
 using DiscordBot_Template.Services;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-
+using MySql.Data.MySqlClient;
 using Serilog;
 
 var builder = new HostApplicationBuilder(args);
@@ -40,6 +40,19 @@ builder.Services.AddSingleton(x => new InteractionService(x.GetRequiredService<D
     LogLevel = LogSeverity.Info
 }));
 
+builder.Services.AddSingleton(provider =>
+{
+    var configuration = provider.GetRequiredService<IConfiguration>();
+    var connectionString = configuration.GetConnectionString("MySql");
+    if (string.IsNullOrEmpty(connectionString))
+    {
+        throw new InvalidOperationException("Connection string is not found.");
+    }
+
+    return new MySqlConnectionStringBuilder(connectionString);
+});
+
+builder.Services.AddSingleton<DiscordBotDBContext>();
 builder.Services.AddSingleton<InteractionHandler>();
 
 builder.Services.AddHostedService<DiscordBotService>();
