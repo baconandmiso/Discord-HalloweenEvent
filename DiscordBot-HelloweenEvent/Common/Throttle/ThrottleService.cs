@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using ReadonlyLocalVariables;
 
 namespace Common.Throttle;
 
@@ -102,6 +103,19 @@ public class ThrottleService : IThrottleService
     /// <param name="command">リクエストされたコマンド名</param>
     /// <returns>リセットまでの残り時間</returns>
     /// <exception cref="ArgumentOutOfRangeException"></exception>
+    [ReassignableVariable("throttles")]
+    [ReassignableVariable("throttleObjectId")]
+    /// <summary>
+    ///     制限リセットまでの残り時間を求める
+    /// </summary>
+    /// <param name="throttleBy">スロットリング対象</param>
+    /// <param name="requestsLimit">許可されたリクエスト数</param>
+    /// <param name="intervalSeconds">スロットリング期間(秒)</param>
+    /// <param name="user">ユーザーオブジェクト</param>
+    /// <param name="guild">サーバーオブジェクト</param>
+    /// <param name="command">リクエストされたコマンド名</param>
+    /// <returns>リセットまでの残り時間</returns>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
     public TimeSpan GetThrottleReset(ThrottleBy throttleBy, int requestsLimit, int intervalSeconds, IUser user, IGuild guild, string? command)
     {
         ConcurrentDictionary<ThrottleKey, ThrottleInfo>? throttles = null;
@@ -131,6 +145,19 @@ public class ThrottleService : IThrottleService
         return TimeSpan.Zero;
     }
 
+    /// <summary>
+    ///     リクエストが可能か調べる
+    /// </summary>
+    /// <param name="throttleBy">スロットリング対象</param>
+    /// <param name="requestsLimit">許可されたリクエスト数</param>
+    /// <param name="intervalSeconds">スロットリング期間(秒)</param>
+    /// <param name="user">ユーザーオブジェクト</param>
+    /// <param name="guild">サーバーオブジェクト</param>
+    /// <param name="command">リクエストされたコマンド名</param>
+    /// <returns>有効: true, 無効: false</returns>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
+    [ReassignableVariable("throttleObjectId")]
+    [ReassignableVariable("throttles")]
     /// <summary>
     ///     リクエストが可能か調べる
     /// </summary>

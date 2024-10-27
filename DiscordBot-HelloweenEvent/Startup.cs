@@ -60,5 +60,4 @@ builder.Services.AddScoped<IThrottleService, ThrottleService>();
 builder.Services.AddHostedService<DiscordBotService>();
 
 var app = builder.Build();
-
 await app.RunAsync();
