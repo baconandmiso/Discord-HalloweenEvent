@@ -85,7 +85,7 @@ public class Point
         var newPoint = Score - point.Score;
         if (newPoint < 0) // 0未満にならないようにする
         {
-            newPoint = 0;
+            return new Point(UserId, 0);
         }
 
         return new Point(UserId, newPoint);
