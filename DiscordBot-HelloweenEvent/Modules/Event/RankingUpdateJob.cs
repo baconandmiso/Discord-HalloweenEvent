@@ -41,9 +41,13 @@ public class RankingUpdateJob : IJob
             ranking_str[i] = $"{i + 1}位: {user.Mention} スコア: {ranking[i].Score}pt";
         }
 
+        var embedAuthorBuilder = new EmbedAuthorBuilder()
+            .WithName("👻 ハロウィンイベント 2024🎃");
+
         var embedBuilder = new EmbedBuilder()
-            .WithTitle("👻 ハロウィンイベント 2024 ランキング TOP10🎃")
+            .WithTitle("ランキング TOP10")
             .WithDescription(string.Join('\n', ranking_str))
+            .WithAuthor(embedAuthorBuilder)
             .WithFooter($"{DateTime.Now:yyyy年MM月dd日 HH時mm分}時点のデータです。")
             .WithColor(Color.DarkPurple);
 

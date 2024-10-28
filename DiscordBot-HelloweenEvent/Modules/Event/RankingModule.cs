@@ -19,9 +19,13 @@ public class RankingModule : InteractionModuleBase<SocketInteractionContext>
     [SlashCommand("ranking-create", "ランキングを作成します。")]
     public async Task Create()
     {
+        var embedAuthorBuilder = new EmbedAuthorBuilder()
+            .WithName("👻 ハロウィンイベント 2024🎃");
+            
         var embedBuilder = new EmbedBuilder()
-            .WithTitle("👻 ハロウィンイベント 2024 ランキング TOP10🎃")
+            .WithTitle("ランキング TOP10")
             .WithDescription("データがありません。")
+            .WithAuthor(embedAuthorBuilder)
             .WithFooter($"{Context.Interaction.CreatedAt.LocalDateTime.ToString("yyyy年MM月dd日 HH時mm分")}時点のデータです。")
             .WithColor(Color.DarkPurple);
 
