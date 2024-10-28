@@ -144,7 +144,7 @@ public class CandyModule : InteractionModuleBase<SocketInteractionContext>
         if (!myPoints.IsListedRanking)
             myPoints.StealCount++;
 
-        if (myPoints.StealCount == 5)
+        if (myPoints.StealCount >= 3)
         {
             myPoints.IsListedRanking = true;
         }

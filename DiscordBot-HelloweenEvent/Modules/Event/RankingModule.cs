@@ -21,7 +21,7 @@ public class RankingModule : InteractionModuleBase<SocketInteractionContext>
     {
         var embedAuthorBuilder = new EmbedAuthorBuilder()
             .WithName("👻 ハロウィンイベント 2024🎃");
-            
+
         var embedBuilder = new EmbedBuilder()
             .WithTitle("ランキング TOP10")
             .WithDescription("データがありません。")
@@ -35,7 +35,7 @@ public class RankingModule : InteractionModuleBase<SocketInteractionContext>
         await DeferAsync();
         await DeleteOriginalResponseAsync();
 
-        await Context.Channel.SendMessageAsync($"ランキング掲載条件\n1. このイベントに参加していること\n2. 最低5回、**お菓子を奪う**のを試みたこと\n\nランキングは10分毎に更新されます。", embed: embedBuilder.Build(), components: componentBuilder.Build());
+        await Context.Channel.SendMessageAsync($"ランキング掲載条件\n1. このイベントに参加していること\n2. 最低3回、**お菓子を奪う**のを試みたこと\n\nランキングは10分毎に更新されます。", embed: embedBuilder.Build(), components: componentBuilder.Build());
     }
 
     [ThrottleCommand(ThrottleBy.User, 1, 70)]
