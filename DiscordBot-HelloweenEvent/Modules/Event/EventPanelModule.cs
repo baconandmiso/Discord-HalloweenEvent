@@ -1,6 +1,5 @@
 namespace Modules.Event;
 
-[DefaultMemberPermissions(GuildPermission.Administrator)]
 [Group("eventpanel", "イベントパネルに関するコマンドです。")]
 public class EventPanelModule : InteractionModuleBase<SocketInteractionContext>
 {
