@@ -117,7 +117,7 @@ public class CandyModule : InteractionModuleBase<SocketInteractionContext>
     /// <summary>
     ///     相手からお菓子を奪う
     /// </summary>
-    [ThrottleCommand(ThrottleBy.User, 2, 180)]
+    [ThrottleCommand(ThrottleBy.User, 3, 180)]
     [ComponentInteraction("steal_candy")]
     public async Task StealCandy(string candy)
     {
