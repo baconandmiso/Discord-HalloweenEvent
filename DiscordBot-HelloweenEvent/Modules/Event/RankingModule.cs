@@ -24,9 +24,9 @@ public class RankingModule : InteractionModuleBase<SocketInteractionContext>
 
         var embedBuilder = new EmbedBuilder()
             .WithTitle("ランキング TOP10")
-            .WithDescription("データがありません。")
+            .WithDescription("集計中...")
             .WithAuthor(embedAuthorBuilder)
-            .WithFooter($"{Context.Interaction.CreatedAt.LocalDateTime.ToString("yyyy年MM月dd日 HH時mm分")}時点のデータです。")
+            .WithFooter($"{Context.Interaction.CreatedAt.LocalDateTime.ToString("yyyy年MM月dd日 HH時mm分")}時点")
             .WithColor(Color.DarkPurple);
 
         var componentBuilder = new ComponentBuilder()

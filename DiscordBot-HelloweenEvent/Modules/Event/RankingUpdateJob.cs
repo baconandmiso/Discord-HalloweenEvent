@@ -31,28 +31,34 @@ public class RankingUpdateJob : IJob
         var messages = await client.GetGuild(guildId).GetTextChannel(channelId).GetMessagesAsync(0, Direction.After, 1).FlattenAsync();
         var message = messages.FirstOrDefault() ?? throw new Exception("メッセージが見つかりません。");
 
-        var points = _dbContext.EventPoints.Where(x => x.IsListedRanking);
-        var ranking = points.OrderByDescending(x => x.Score).Take(10).ToList();
-
-        var ranking_str = new string[ranking.Count];
-        for (var i = 0; i < ranking.Count; i++)
-        {
-            var user = client.GetUser(ranking[i].UserId);
-            ranking_str[i] = $"{i + 1}位: {user.Mention} スコア: {ranking[i].Score}pt";
-        }
-
         var embedAuthorBuilder = new EmbedAuthorBuilder()
             .WithName("👻 ハロウィンイベント 2024🎃");
 
         var embedBuilder = new EmbedBuilder()
             .WithTitle("ランキング TOP10")
-            .WithDescription(string.Join('\n', ranking_str))
             .WithAuthor(embedAuthorBuilder)
-            .WithFooter($"{DateTime.Now:yyyy年MM月dd日 HH時mm分}時点のデータです。")
+            .WithFooter($"{DateTime.Now:yyyy年MM月dd日 HH時mm分}時点")
             .WithColor(Color.DarkPurple);
 
-        await message.Channel.ModifyMessageAsync(message.Id, x => x.Embed = embedBuilder.Build());
+        var points = _dbContext.EventPoints.Where(x => x.IsListedRanking);
+        var ranking = points.OrderByDescending(x => x.Score).Take(10).ToList();
 
-        Console.WriteLine("ランキングを更新しました。");
+        if (ranking.Count == 0)
+        {
+            embedBuilder.WithDescription("集計中...");
+        }
+        else
+        {
+            var ranking_str = new string[ranking.Count];
+            for (var i = 0; i < ranking.Count; i++)
+            {
+                var user = client.GetUser(ranking[i].UserId);
+                ranking_str[i] = $"{i + 1}位: {user.Mention} スコア: {ranking[i].Score}pt";
+            }
+
+            embedBuilder.WithDescription(string.Join("\n", ranking_str));
+        }
+
+        await message.Channel.ModifyMessageAsync(message.Id, x => x.Embed = embedBuilder.Build());
     }
 }
